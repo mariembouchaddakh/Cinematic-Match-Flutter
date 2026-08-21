@@ -36,7 +36,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // ========== CONTRÔLEURS DE FORMULAIRE ==========
   
   /// Contrôleur pour le champ email
   final _emailController = TextEditingController();
@@ -44,7 +43,6 @@ class _LoginScreenState extends State<LoginScreen> {
   /// Contrôleur pour le champ mot de passe
   final _passwordController = TextEditingController();
 
-  // ========== ÉTAT DE L'INTERFACE ==========
   
   /// Indicateur de chargement (affiche un spinner pendant la connexion)
   bool _isLoading = false;
@@ -52,7 +50,6 @@ class _LoginScreenState extends State<LoginScreen> {
   /// Message à afficher à l'utilisateur (erreur ou succès)
   String _message = '';
 
-  // ========== MÉTHODES ==========
 
   /// Fonction principale de connexion
   /// 
@@ -67,7 +64,6 @@ class _LoginScreenState extends State<LoginScreen> {
   /// - Affiche un message d'erreur spécifique selon le type d'erreur
   /// - Ignore les erreurs Firebase internes (PigeonUserDetails)
   void _login() {
-    // Valider l'email
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       setState(() {
@@ -83,7 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Valider le mot de passe
     if (_passwordController.text.isEmpty) {
       setState(() {
         _message = 'Veuillez entrer votre mot de passe';
@@ -91,30 +86,25 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Afficher l'indicateur de chargement
     setState(() {
       _isLoading = true;
       _message = '';
     });
 
-    // Se connecter avec Firebase
     debugPrint('Tentative de connexion avec: $email');
     
-    // Utiliser un try-catch pour capturer les erreurs même après la connexion réussie
     try {
     FirebaseAuth.instance.signInWithEmailAndPassword(
       email: email,
       password: _passwordController.text,
     ).then((userCredential) {
         debugPrint('Connexion réussie pour: ${userCredential.user?.email}');
-        // Attendre un peu avant de naviguer pour laisser Firebase terminer ses opérations
         Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
             try {
         Navigator.pushReplacementNamed(context, '/home');
             } catch (navError) {
               debugPrint('Erreur lors de la navigation: $navError');
-              // Essayer une navigation alternative
               try {
                 Navigator.pushReplacement(
                   context,
@@ -127,13 +117,11 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         });
     }).catchError((error) {
-        // Ignorer l'erreur "PigeonUserDetails" si elle survient après une connexion réussie
         final errorString = error.toString().toLowerCase();
         if (errorString.contains('pigeonuserdetails') || 
             errorString.contains('list<object?>') ||
             (errorString.contains('type') && errorString.contains('subtype'))) {
           debugPrint('Erreur Firebase interne ignorée (non bloquante): $error');
-          // Si l'utilisateur est connecté malgré l'erreur, naviguer quand même
           final currentUser = FirebaseAuth.instance.currentUser;
           if (currentUser != null && mounted) {
             Future.delayed(const Duration(milliseconds: 500), () {
@@ -146,11 +134,9 @@ class _LoginScreenState extends State<LoginScreen> {
               }
             });
           }
-          // Ne pas appeler setState si on ignore l'erreur
           return;
         }
         
-        // Pour les autres erreurs, les traiter normalement
         _handleLoginError(error);
       });
     } catch (e) {
@@ -159,7 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
   
   void _handleLoginError(dynamic error) {
-      // Si il y a une erreur
     debugPrint('Erreur de connexion complète: $error');
     debugPrint('Type d\'erreur: ${error.runtimeType}');
     
@@ -203,7 +188,6 @@ class _LoginScreenState extends State<LoginScreen> {
             'SHA-1: C7:62:54:87:8D:D3:D3:63:50:F9:F5:91:B6:9D:C0:39:63:25:D8:C7\n'
             'SHA-256: 32:91:68:75:39:DE:E0:78:85:1A:01:59:70:AA:67:CE:08:B6:93:B6:C1:81:41:B8:9A:A8:26:C3:FB:3E:95:41';
       } else {
-        // Afficher le message d'erreur complet pour le débogage
         errorMessage = 'Erreur de connexion:\n\n${error.toString()}\n\n'
             'Code: $errorCode\n\n'
             'Vérifiez vos identifiants ou consultez les logs pour plus de détails.';
@@ -219,10 +203,8 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       debugPrint('🎬 LoginScreen - Création du Scaffold...');
       
-      // Test avec un Scaffold minimal pour voir si le problème vient du contenu
       debugPrint('🎬 LoginScreen - Retour du Scaffold');
       
-      // Code original restauré
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connexion'),
@@ -249,7 +231,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            // Champ Email
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(
@@ -260,7 +241,6 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
-            // Champ Mot de passe
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(
@@ -271,7 +251,6 @@ class _LoginScreenState extends State<LoginScreen> {
               obscureText: true,
             ),
             const SizedBox(height: 24),
-            // Bouton de connexion
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -283,7 +262,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // Afficher le message
             if (_message.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -297,7 +275,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             const SizedBox(height: 16),
-            // Lien vers l'inscription
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -330,7 +307,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Nettoyer les contrôleurs quand l'écran est détruit
   @override
   void dispose() {
     _emailController.dispose();

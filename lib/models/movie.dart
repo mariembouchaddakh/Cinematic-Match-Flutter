@@ -24,7 +24,7 @@ class Movie {
   /// - Timestamp : Si le film a été créé dans l'application
   /// 
   /// Type : String (non nullable, toujours présent)
-  final String id; // Identifiant unique du film (requis)
+  final String id;
   
   /// Titre du film
   /// 
@@ -32,7 +32,7 @@ class Movie {
   /// Utilisé pour la recherche et l'affichage.
   /// 
   /// Type : String (non nullable, toujours présent)
-  final String title; // Titre du film (requis)
+  final String title;
   
   /// Description/résumé du film
   /// 
@@ -40,7 +40,7 @@ class Movie {
   /// Utilisé pour l'affichage dans la liste et la page de détails.
   /// 
   /// Type : String (non nullable, peut être vide "")
-  final String description; // Description du film (requis)
+  final String description;
   
   /// URL de l'affiche du film
   /// 
@@ -48,7 +48,7 @@ class Movie {
   /// Peut provenir de TMDb, d'une URL externe, ou d'un placeholder.
   /// 
   /// Type : String (non nullable, toujours présent)
-  final String imageUrl; // URL de l'affiche (requis)
+  final String imageUrl;
   
   /// Note du film sur 10 (peut être 0 si non spécifiée)
   /// 
@@ -56,7 +56,7 @@ class Movie {
   /// Utilisée pour l'affichage et le tri des films.
   /// 
   /// Type : double (non nullable, 0.0 par défaut)
-  final double rating; // Note du film (requis)
+  final double rating;
   
   /// Année de sortie du film
   /// 
@@ -64,7 +64,7 @@ class Movie {
   /// Utilisée pour l'affichage et le filtrage.
   /// 
   /// Type : int (non nullable, 0 par défaut)
-  final int year; // Année de sortie (requis)
+  final int year;
   
   /// Genre(s) du film (ex: "Action, Thriller")
   /// 
@@ -72,7 +72,7 @@ class Movie {
   /// Peut contenir un ou plusieurs genres.
   /// 
   /// Type : String (non nullable, peut être vide "")
-  final String genre; // Genre(s) du film (requis)
+  final String genre;
   
   /// Nom du réalisateur
   /// 
@@ -80,7 +80,7 @@ class Movie {
   /// Utilisé pour l'affichage dans la page de détails.
   /// 
   /// Type : String (non nullable, peut être "Non spécifié")
-  final String director; // Nom du réalisateur (requis)
+  final String director;
 
   /// Constructeur du modèle Movie
   /// 
@@ -99,14 +99,14 @@ class Movie {
   /// - [genre] : Genre(s) (requis, non nullable)
   /// - [director] : Réalisateur (requis, non nullable)
   Movie({
-    required this.id, // ID unique (obligatoire)
-    required this.title, // Titre (obligatoire)
-    required this.description, // Description (obligatoire)
-    required this.imageUrl, // URL image (obligatoire)
-    required this.rating, // Note (obligatoire)
-    required this.year, // Année (obligatoire)
-    required this.genre, // Genre (obligatoire)
-    required this.director, // Réalisateur (obligatoire)
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.imageUrl,
+    required this.rating,
+    required this.year,
+    required this.genre,
+    required this.director,
   });
 
   /// Factory constructor : Crée une instance Movie à partir d'un JSON (Firestore ou API)
@@ -135,26 +135,15 @@ class Movie {
   /// - genre : '' (chaîne vide)
   /// - director : '' (chaîne vide)
   factory Movie.fromJson(Map<String, dynamic> json) {
-    // Créer et retourner une instance Movie avec les données parsées
     return Movie(
-      // id : Récupérer depuis JSON ou chaîne vide si absent
-      id: json['id'] ?? '', // ID ou chaîne vide
-      // title : Récupérer depuis JSON ou chaîne vide si absent
-      title: json['title'] ?? '', // Titre ou chaîne vide
-      // description : Récupérer depuis JSON ou chaîne vide si absent
-      description: json['description'] ?? '', // Description ou chaîne vide
-      // imageUrl : Récupérer depuis JSON ou chaîne vide si absent
-      imageUrl: json['imageUrl'] ?? '', // URL image ou chaîne vide
-      // rating : Récupérer depuis JSON, convertir en double, ou 0.0 si absent
-      // (json['rating'] ?? 0.0) : Utiliser la valeur JSON ou 0.0 par défaut
-      // .toDouble() : Convertir en double (nécessaire si c'est un int)
-      rating: (json['rating'] ?? 0.0).toDouble(), // Note ou 0.0
-      // year : Récupérer depuis JSON ou 0 si absent
-      year: json['year'] ?? 0, // Année ou 0
-      // genre : Récupérer depuis JSON ou chaîne vide si absent
-      genre: json['genre'] ?? '', // Genre ou chaîne vide
-      // director : Récupérer depuis JSON ou chaîne vide si absent
-      director: json['director'] ?? '', // Réalisateur ou chaîne vide
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      imageUrl: json['imageUrl'] ?? '',
+      rating: (json['rating'] ?? 0.0).toDouble(),
+      year: json['year'] ?? 0,
+      genre: json['genre'] ?? '',
+      director: json['director'] ?? '',
     );
   }
 
@@ -171,16 +160,15 @@ class Movie {
   /// 
   /// Note : Tous les champs sont inclus, y compris l'ID (contrairement à AppUser.toJson)
   Map<String, dynamic> toJson() {
-    // Retourner un Map avec tous les champs du film
     return {
-      'id': id, // Identifiant unique
-      'title': title, // Titre du film
-      'description': description, // Description
-      'imageUrl': imageUrl, // URL de l'affiche
-      'rating': rating, // Note sur 10
-      'year': year, // Année de sortie
-      'genre': genre, // Genre(s)
-      'director': director, // Réalisateur
+      'id': id,
+      'title': title,
+      'description': description,
+      'imageUrl': imageUrl,
+      'rating': rating,
+      'year': year,
+      'genre': genre,
+      'director': director,
     };
   }
 }

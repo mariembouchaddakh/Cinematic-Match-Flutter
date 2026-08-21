@@ -74,7 +74,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       }
     } catch (e) {
       debugPrint('❌ Erreur lors de la vérification du statut favori: $e');
-      // En cas d'erreur, afficher quand même le bouton (non favori par défaut)
       if (mounted) {
         setState(() {
           _isFavorite = false;
@@ -103,7 +102,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
         await _firestoreService.addFavoriteMovie(user.uid, widget.movie.id);
         debugPrint('✅ Film ${widget.movie.id} ajouté aux favoris avec succès');
         
-        // Recharger le statut pour être sûr
         await _checkFavoriteStatus();
         
         if (mounted) {
@@ -120,7 +118,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
         await _firestoreService.removeFavoriteMovie(user.uid, widget.movie.id);
         debugPrint('✅ Film ${widget.movie.id} retiré des favoris avec succès');
         
-        // Recharger le statut pour être sûr
         await _checkFavoriteStatus();
         
         if (mounted) {
@@ -134,7 +131,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
         }
       }
     } catch (e) {
-      // En cas d'erreur, annuler le changement d'état
       setState(() {
         _isFavorite = !_isFavorite;
       });
@@ -184,7 +180,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
       appBar: AppBar(
         title: Text(widget.movie.title),
         actions: [
-          // Toujours afficher le bouton, même pendant le chargement
           _isLoading
               ? const Padding(
                   padding: EdgeInsets.all(16.0),
@@ -208,7 +203,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image du film
             Container(
               width: double.infinity,
               height: 400,
@@ -234,7 +228,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Titre et note
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -279,7 +272,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Année et genre
                   Wrap(
                     spacing: 16,
                     children: [
@@ -294,7 +286,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Réalisateur
                   Row(
                     children: [
                       const Icon(
@@ -312,7 +303,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  // Description
                   const Text(
                     'Description',
                     style: TextStyle(

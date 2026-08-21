@@ -32,7 +32,6 @@ class FirestoreService {
   /// Instance Firebase Storage pour gérer les fichiers (photos)
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // ========== NOMS DES COLLECTIONS ==========
   
   /// Nom de la collection Firestore pour les utilisateurs
   static const String usersCollection = 'users';
@@ -40,7 +39,6 @@ class FirestoreService {
   /// Nom de la collection Firestore pour les films
   static const String moviesCollection = 'movies';
 
-  // ========== OPÉRATIONS UTILISATEURS ==========
 
   /// Crée ou met à jour un utilisateur dans Firestore
   /// 
@@ -58,11 +56,10 @@ class FirestoreService {
   Future<void> createOrUpdateUser(AppUser user) async {
     await _firestore
         .collection(usersCollection)
-        .doc(user.id) // ID = UID Firebase Auth
-        .set(user.toJson(), SetOptions(merge: true)); // Merge = ne pas écraser les champs existants
+        .doc(user.id)
+        .set(user.toJson(), SetOptions(merge: true));
   }
 
-  // Récupérer un utilisateur par ID
   Future<AppUser?> getUserById(String userId) async {
     try {
       final doc = await _firestore.collection(usersCollection).doc(userId).get();
@@ -70,7 +67,6 @@ class FirestoreService {
         final data = doc.data()!;
         final appUser = AppUser.fromJson(data, doc.id);
         
-        // Vérifier et compléter les champs manquants
         await _ensureUserFieldsComplete(userId, appUser, data);
         
         return appUser;
@@ -83,23 +79,19 @@ class FirestoreService {
     }
   }
 
-  // Compléter automatiquement les champs manquants d'un utilisateur
   Future<void> _ensureUserFieldsComplete(String userId, AppUser appUser, Map<String, dynamic> data) async {
     try {
       final authUser = FirebaseAuth.instance.currentUser;
       bool needsUpdate = false;
       final updates = <String, dynamic>{};
 
-      // Vérifier et compléter l'email
       if (appUser.email.isEmpty && authUser?.email != null) {
         updates['email'] = authUser!.email!;
         needsUpdate = true;
         debugPrint('✅ Email complété automatiquement: ${authUser.email}');
       }
 
-      // Vérifier et compléter firstName
       if (appUser.firstName.isEmpty) {
-        // Essayer d'extraire depuis le displayName ou email
         String firstName = 'Utilisateur';
         if (authUser?.displayName != null && authUser!.displayName!.isNotEmpty) {
           final parts = authUser.displayName!.split(' ');
@@ -114,7 +106,6 @@ class FirestoreService {
         debugPrint('✅ firstName complété automatiquement: $firstName');
       }
 
-      // Vérifier et compléter lastName
       if (appUser.lastName.isEmpty && authUser?.displayName != null) {
         final parts = authUser!.displayName!.split(' ');
         if (parts.length > 1) {
@@ -124,30 +115,22 @@ class FirestoreService {
         }
       }
 
-      // Vérifier et compléter age
-      // Ne pas mettre 0 par défaut, laisser le champ vide si absent
-      // L'âge sera affiché comme "Non spécifié" dans l'interface
       if (!data.containsKey('age')) {
-        // Ne pas ajouter le champ age s'il n'existe pas
-        // L'utilisateur devra le remplir manuellement ou lors de l'inscription
         debugPrint('⚠️ Champ age manquant, mais non complété automatiquement (doit être rempli manuellement)');
       }
 
-      // Vérifier et compléter role
       if (appUser.role.isEmpty || !data.containsKey('role')) {
-        updates['role'] = 'user'; // Par défaut, pas admin
+        updates['role'] = 'user';
         needsUpdate = true;
         debugPrint('✅ role complété automatiquement: user');
       }
 
-      // Vérifier et compléter isActive
       if (!data.containsKey('isActive')) {
         updates['isActive'] = true;
         needsUpdate = true;
         debugPrint('✅ isActive complété automatiquement: true');
       }
 
-      // Sauvegarder les mises à jour si nécessaire
       if (needsUpdate) {
         await _firestore
             .collection(usersCollection)
@@ -157,18 +140,15 @@ class FirestoreService {
       }
     } catch (e) {
       debugPrint('⚠️ Erreur lors de la complétion automatique des champs: $e');
-      // Ne pas bloquer si la complétion échoue
     }
   }
 
-  // Récupérer l'utilisateur actuel
   Future<AppUser?> getCurrentUser() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         final appUser = await getUserById(user.uid);
         
-        // Si le document n'existe pas du tout, créer un profil minimal
         if (appUser == null) {
           debugPrint('📝 Création d\'un profil minimal pour: ${user.uid}');
           final newUser = AppUser(
@@ -194,7 +174,6 @@ class FirestoreService {
     }
   }
 
-  // Vérifier si l'utilisateur actuel est admin
   Future<bool> isCurrentUserAdmin() async {
     try {
       final appUser = await getCurrentUser();
@@ -205,7 +184,6 @@ class FirestoreService {
     }
   }
 
-  // Désactiver un utilisateur (admin seulement)
   Future<void> disableUser(String userId) async {
     await _firestore
         .collection(usersCollection)
@@ -213,7 +191,6 @@ class FirestoreService {
         .update({'isActive': false});
   }
 
-  // Activer un utilisateur (admin seulement)
   Future<void> enableUser(String userId) async {
     await _firestore
         .collection(usersCollection)
@@ -221,7 +198,6 @@ class FirestoreService {
         .update({'isActive': true});
   }
 
-  // Récupérer tous les utilisateurs (admin seulement)
   Future<List<AppUser>> getAllUsers() async {
     try {
       final snapshot = await _firestore.collection(usersCollection).get();
@@ -243,7 +219,6 @@ class FirestoreService {
     }
   }
 
-  // Upload une photo de profil
   Future<String?> uploadProfilePhoto(String userId, File imageFile) async {
     try {
       final ref = _storage.ref().child('profile_photos/$userId.jpg');
@@ -255,9 +230,7 @@ class FirestoreService {
     }
   }
 
-  // ========== FAVORITE MOVIES OPERATIONS ==========
 
-  // Ajouter un film aux favoris avec retry automatique
   Future<void> addFavoriteMovie(String userId, String movieId) async {
     const maxRetries = 3;
     const baseDelay = Duration(seconds: 1);
@@ -266,23 +239,20 @@ class FirestoreService {
       try {
         final userRef = _firestore.collection(usersCollection).doc(userId);
         
-        // Vérifier si le document existe
         final doc = await userRef.get();
         
         if (doc.exists) {
-          // Si le document existe, utiliser update
           await userRef.update({
             'favoriteMovies': FieldValue.arrayUnion([movieId]),
           });
         } else {
-          // Si le document n'existe pas, créer le document avec set
           await userRef.set({
             'favoriteMovies': [movieId],
           }, SetOptions(merge: true));
         }
         
         print('✅ Film $movieId ajouté aux favoris pour l\'utilisateur $userId');
-        return; // Succès, sortir de la boucle
+        return;
       } catch (e) {
         final errorString = e.toString().toLowerCase();
         final isPermissionDenied = errorString.contains('permission_denied') || 
@@ -300,7 +270,6 @@ class FirestoreService {
                               errorString.contains('transient');
         
         if (isUnavailable && attempt < maxRetries - 1) {
-          // Attendre avant de réessayer (backoff exponentiel)
           final delay = Duration(milliseconds: baseDelay.inMilliseconds * (1 << attempt));
           print('⚠️ Service indisponible, nouvelle tentative dans ${delay.inSeconds}s... (${attempt + 1}/$maxRetries)');
           await Future.delayed(delay);
@@ -313,7 +282,6 @@ class FirestoreService {
     }
   }
 
-  // Retirer un film des favoris avec retry automatique
   Future<void> removeFavoriteMovie(String userId, String movieId) async {
     const maxRetries = 3;
     const baseDelay = Duration(seconds: 1);
@@ -322,7 +290,6 @@ class FirestoreService {
       try {
         final userRef = _firestore.collection(usersCollection).doc(userId);
         
-        // Vérifier si le document existe
         final doc = await userRef.get();
         
         if (doc.exists) {
@@ -330,7 +297,7 @@ class FirestoreService {
             'favoriteMovies': FieldValue.arrayRemove([movieId]),
           });
           print('✅ Film $movieId retiré des favoris pour l\'utilisateur $userId');
-          return; // Succès, sortir de la boucle
+          return;
         } else {
           print('⚠️ Document utilisateur n\'existe pas, rien à retirer');
           return;
@@ -352,7 +319,6 @@ class FirestoreService {
                               errorString.contains('transient');
         
         if (isUnavailable && attempt < maxRetries - 1) {
-          // Attendre avant de réessayer (backoff exponentiel)
           final delay = Duration(milliseconds: baseDelay.inMilliseconds * (1 << attempt));
           print('⚠️ Service indisponible, nouvelle tentative dans ${delay.inSeconds}s... (${attempt + 1}/$maxRetries)');
           await Future.delayed(delay);
@@ -365,7 +331,6 @@ class FirestoreService {
     }
   }
 
-  // Vérifier si un film est dans les favoris
   Future<bool> isFavoriteMovie(String userId, String movieId) async {
     try {
       final doc = await _firestore.collection(usersCollection).doc(userId).get();
@@ -383,7 +348,6 @@ class FirestoreService {
     }
   }
 
-  // Récupérer les films favoris d'un utilisateur
   Future<List<String>> getFavoriteMovies(String userId) async {
     try {
       final doc = await _firestore.collection(usersCollection).doc(userId).get();
@@ -401,9 +365,7 @@ class FirestoreService {
     }
   }
 
-  // ========== MOVIE OPERATIONS ==========
 
-  // Ajouter un film à la base (admin seulement)
   Future<void> addMovie(Movie movie) async {
     await _firestore
         .collection(moviesCollection)
@@ -411,7 +373,6 @@ class FirestoreService {
         .set(movie.toJson());
   }
 
-  // Récupérer tous les films depuis Firestore
   Future<List<Movie>> getMoviesFromFirestore() async {
     try {
       final snapshot = await _firestore.collection(moviesCollection).get();
@@ -424,7 +385,6 @@ class FirestoreService {
     }
   }
 
-  // Récupérer un film par ID depuis Firestore
   Future<Movie?> getMovieByIdFromFirestore(String movieId) async {
     try {
       final doc = await _firestore.collection(moviesCollection).doc(movieId).get();
@@ -438,9 +398,7 @@ class FirestoreService {
     }
   }
 
-  // ========== MATCHING OPERATIONS ==========
 
-  // Calculer le taux de correspondance entre deux utilisateurs
   double calculateMatchRate(AppUser user1, AppUser user2) {
     if (user1.favoriteMovies.isEmpty || user2.favoriteMovies.isEmpty) {
       print('   ⚠️ Un des utilisateurs n\'a pas de favoris');
@@ -450,23 +408,19 @@ class FirestoreService {
     final set1 = user1.favoriteMovies.toSet();
     final set2 = user2.favoriteMovies.toSet();
 
-    // Calculer l'intersection (films communs)
     final intersection = set1.intersection(set2).length;
     print('   📊 Films en commun: $intersection');
     
-    // Calculer l'union (tous les films uniques)
     final union = set1.union(set2).length;
     print('   📊 Total de films uniques: $union');
 
     if (union == 0) return 0.0;
 
-    // Taux de correspondance basé sur Jaccard similarity
     final rate = (intersection / union) * 100;
     print('   📊 Calcul: ($intersection / $union) × 100 = ${rate.toStringAsFixed(1)}%');
     return rate;
   }
 
-  // Trouver les utilisateurs avec un taux de correspondance > 75%
   Future<List<Map<String, dynamic>>> findMatchingUsers(String userId) async {
     try {
       print('');
@@ -520,7 +474,6 @@ class FirestoreService {
       int comparisonCount = 0;
 
       for (final user in allUsers) {
-        // Ignorer l'utilisateur actuel et les utilisateurs désactivés
         if (user.id == userId) {
           print('⏭️ Ignoré: ${user.firstName} ${user.lastName} (utilisateur actuel)');
           continue;
@@ -559,7 +512,6 @@ class FirestoreService {
         }
       }
 
-      // Trier par taux de correspondance décroissant
       matches.sort((a, b) => (b['matchRate'] as double).compareTo(a['matchRate'] as double));
 
       print('');

@@ -40,23 +40,18 @@ class MovieService {
     try {
       print('🎬 Début du chargement des films...');
       
-      // D'abord, récupérer les films depuis Firestore (ajoutés par l'admin)
       final firestoreMovies = await _firestoreService.getMoviesFromFirestore();
       print('📚 ${firestoreMovies.length} films depuis Firestore');
       
-      // Ensuite, récupérer des films depuis l'API MovieDB
       final apiMovies = await _getMoviesFromAPI();
       print('🌐 ${apiMovies.length} films depuis l\'API');
       
-      // Combiner les deux listes (éviter les doublons par ID)
       final allMovies = <String, Movie>{};
       
-      // Ajouter les films Firestore en premier (priorité)
       for (final movie in firestoreMovies) {
         allMovies[movie.id] = movie;
       }
       
-      // Ajouter les films API (sauf ceux déjà présents)
       for (final movie in apiMovies) {
         if (!allMovies.containsKey(movie.id)) {
           allMovies[movie.id] = movie;
@@ -66,7 +61,6 @@ class MovieService {
       final totalMovies = allMovies.values.toList();
       print('✅ Total: ${totalMovies.length} films chargés');
       
-      // Si aucun film n'a été trouvé, utiliser les films de démonstration
       if (totalMovies.isEmpty) {
         print('⚠️ Aucun film trouvé, utilisation des films de démonstration');
         return _getDemoMovies();
@@ -75,21 +69,17 @@ class MovieService {
       return totalMovies;
     } catch (e) {
       print('❌ Erreur lors de la récupération des films: $e');
-      // En cas d'erreur, retourner les films de démonstration
       return _getDemoMovies();
     }
   }
 
-  // Récupérer des films depuis l'API TMDb (The Movie Database)
   Future<List<Movie>> _getMoviesFromAPI() async {
-    // Essayer d'abord TMDb (plus simple et gratuit)
     if (AppConstants.tmdbApiKey != 'YOUR_TMDB_API_KEY' && 
         AppConstants.tmdbApiKey.isNotEmpty) {
       print('🔑 Clé API TMDb détectée, tentative de récupération...');
       return await _getMoviesFromTMDB();
     }
     
-    // Sinon, essayer RapidAPI si configuré
     if (AppConstants.rapidApiKey != 'YOUR_RAPIDAPI_KEY' && 
         AppConstants.rapidApiKey.isNotEmpty) {
       print('🔑 Clé API RapidAPI détectée, tentative de récupération...');
@@ -103,12 +93,10 @@ class MovieService {
     return [];
   }
 
-  // Récupérer des films depuis TMDb (The Movie Database)
   Future<List<Movie>> _getMoviesFromTMDB() async {
     try {
       final List<Movie> allMovies = [];
       
-      // Récupérer plusieurs pages pour avoir plus de films (jusqu'à 5 pages = 100 films)
       const int maxPages = 5;
       print('📡 Récupération de $maxPages pages de films depuis TMDb...');
       
@@ -134,7 +122,7 @@ class MovieService {
               print('✅ Page $page: ${movies.length} films ajoutés (Total: ${allMovies.length})');
             } else {
               print('⚠️ Page $page: Aucun résultat');
-              break; // Arrêter si une page est vide
+              break;
             }
           } else {
             print('❌ Erreur TMDb page $page - Status: ${response.statusCode}');
@@ -150,13 +138,11 @@ class MovieService {
             }
           }
           
-          // Petite pause entre les pages pour éviter de surcharger l'API
           if (page < maxPages) {
             await Future.delayed(const Duration(milliseconds: 200));
           }
         } catch (e) {
           print('❌ Erreur lors de la récupération de la page $page: $e');
-          // Continuer avec les autres pages même en cas d'erreur
         }
       }
       
@@ -169,7 +155,6 @@ class MovieService {
     return [];
   }
 
-  // Récupérer des films depuis RapidAPI (alternative)
   Future<List<Movie>> _getMoviesFromRapidAPI() async {
     try {
       final url = Uri.parse('${AppConstants.rapidApiBaseUrl}/titles/random?list=most_pop_movies&limit=20');
@@ -209,7 +194,6 @@ class MovieService {
     return [];
   }
 
-  // Parser un film depuis la réponse TMDb
   Movie? _parseMovieFromTMDB(Map<String, dynamic> json) {
     try {
       final id = json['id']?.toString() ?? '';
@@ -223,11 +207,9 @@ class MovieService {
       final year = json['release_date']?.toString().split('-').first ?? '0';
       final yearInt = int.tryParse(year) ?? 0;
       
-      // Extraire les genres (TMDb retourne des IDs, on utilise le premier)
       final genreIds = json['genre_ids'] as List?;
       String genre = 'Non spécifié';
       if (genreIds != null && genreIds.isNotEmpty) {
-        // Mapping simple des genres TMDb
         final genreMap = {
           28: 'Action', 12: 'Aventure', 16: 'Animation', 35: 'Comédie',
           80: 'Crime', 99: 'Documentaire', 18: 'Drame', 10751: 'Famille',
@@ -252,7 +234,7 @@ class MovieService {
         rating: rating,
         year: yearInt,
         genre: genre,
-        director: 'Non spécifié', // TMDb ne fournit pas le réalisateur dans la liste
+        director: 'Non spécifié',
       );
     } catch (e) {
       print('Erreur lors du parsing du film TMDb: $e');
@@ -260,7 +242,6 @@ class MovieService {
     }
   }
 
-  // Parser un film depuis la réponse API RapidAPI (ancien format)
   Movie? _parseMovieFromAPI(Map<String, dynamic> json) {
     try {
       final titleText = json['titleText'] as Map<String, dynamic>?;
@@ -272,8 +253,6 @@ class MovieService {
       final imageUrl = primaryImage?['url']?.toString() ?? '';
       final year = releaseYear?['year'] as int? ?? 0;
       
-      // L'API MovieDB ne fournit pas toujours toutes les informations
-      // On utilise des valeurs par défaut
       return Movie(
         id: id,
         title: title,
@@ -292,7 +271,6 @@ class MovieService {
     }
   }
 
-  // Extraire les genres depuis la réponse API
   String _extractGenres(Map<String, dynamic> json) {
     try {
       final genres = json['genres'] as Map<String, dynamic>?;
@@ -309,7 +287,6 @@ class MovieService {
     return 'Non spécifié';
   }
 
-  // Extraire le réalisateur depuis la réponse API
   String _extractDirector(Map<String, dynamic> json) {
     try {
       final directors = json['directors'] as List?;
@@ -328,7 +305,6 @@ class MovieService {
     return 'Non spécifié';
   }
 
-  // Rechercher des films par titre (dans Firestore et API)
   Future<List<Movie>> searchMovies(String query) async {
     if (query.isEmpty) {
       return getMovies();
@@ -348,14 +324,11 @@ class MovieService {
     }
   }
 
-  // Récupérer un film par ID
   Future<Movie?> getMovieById(String id) async {
     try {
-      // D'abord chercher dans Firestore
       final movie = await _firestoreService.getMovieByIdFromFirestore(id);
       if (movie != null) return movie;
       
-      // Sinon, chercher dans tous les films
       final allMovies = await getMovies();
       try {
         return allMovies.firstWhere((movie) => movie.id == id);
@@ -368,7 +341,6 @@ class MovieService {
     }
   }
 
-  // Films de démonstration (fallback)
   List<Movie> _getDemoMovies() {
     return [
     Movie(

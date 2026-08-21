@@ -51,7 +51,6 @@ class HomeScreen extends StatefulWidget {
 /// 
 /// SingleTickerProviderStateMixin : Fournit un Ticker pour animer le TabController
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
-  // ========== SERVICES ==========
   
   /// Service pour récupérer les films depuis Firestore et l'API externe (TMDb)
   /// 
@@ -73,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   /// Instance finale (ne change jamais après l'initialisation)
   final FirestoreService _firestoreService = FirestoreService();
   
-  // ========== ÉTAT DE L'INTERFACE ==========
   
   /// Liste de tous les films disponibles dans l'application
   /// 
@@ -171,49 +169,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   /// 5. Ajouter un listener au champ de recherche
   @override
   void initState() {
-    // Appeler super.initState() est OBLIGATOIRE
-    // Cette méthode initialise l'état du widget parent (State<HomeScreen>)
     super.initState();
     
-    // Initialiser le TabController pour gérer les onglets
-    // Cette méthode configure le contrôleur avec 4 onglets
     _initializeTabController();
     
-    // Délayer le chargement des données utilisateur pour éviter les erreurs Firebase
-    // 
-    // Problème : Firebase peut avoir des erreurs internes (PigeonUserDetails) si on
-    // accède aux données utilisateur trop rapidement après la connexion.
-    // 
-    // Solution : Attendre 500ms avant de charger les données utilisateur.
-    // Cela laisse le temps à Firebase de terminer ses opérations internes.
-    // 
-    // Future.delayed : Crée un Future qui se complète après le délai spécifié
-    // Duration(milliseconds: 500) : Délai de 500 millisecondes (0.5 seconde)
-    // () { _loadUserData(); } : Fonction anonyme appelée après le délai
     Future.delayed(const Duration(milliseconds: 500), () {
-      // Charger les données utilisateur depuis Firestore
-      // Cette méthode récupère le profil complet de l'utilisateur
       _loadUserData();
     });
     
-    // Charger immédiatement la liste des films
-    // Cette méthode récupère les films depuis Firestore et l'API
-    // Elle ne dépend pas de l'utilisateur, donc pas besoin de délai
     _loadMovies();
     
-    // Ajouter un listener au contrôleur de recherche
-    // Ce listener se déclenche à chaque modification du texte dans le champ de recherche
-    // _onSearchChanged est appelée automatiquement à chaque changement
     _searchController.addListener(_onSearchChanged);
   }
 
   void _initializeTabController() {
-    // Toujours initialiser avec 4 onglets (le dernier sera masqué si pas admin)
     _tabController = TabController(length: 4, vsync: this);
-    // Écouter les changements pour éviter les erreurs d'index
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
-        // Vérifier que l'index est valide
         if (_tabController.index >= _tabController.length) {
           debugPrint('⚠️ Index de tab invalide: ${_tabController.index}');
         }
@@ -223,11 +195,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   Future<void> _loadUserData() async {
     if (_user != null) {
-      // Utiliser un try-catch avec gestion spécifique de l'erreur PigeonUserDetails
       try {
         debugPrint('Chargement des données utilisateur pour: ${_user!.uid} (${_user!.email})');
         
-        // Charger les données utilisateur avec gestion d'erreur spécifique
         AppUser? appUser;
         try {
           appUser = await _firestoreService.getUserById(_user!.uid);
@@ -240,21 +210,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               errorString.contains('list<object?>') ||
               (errorString.contains('type') && errorString.contains('subtype'))) {
             debugPrint('Erreur Firebase interne lors du chargement utilisateur (ignorée): $e');
-            // Continuer avec un utilisateur null, on créera un profil minimal
           } else {
-            rethrow; // Relancer les autres erreurs
+            rethrow;
           }
         }
         
         if (mounted) {
           setState(() {
             _appUser = appUser;
-            // Définir isAdmin basé sur le rôle de l'utilisateur si disponible
             _isAdmin = appUser?.isAdmin ?? false;
           });
         }
         
-        // Charger le statut admin séparément pour éviter les erreurs
         if (appUser == null) {
           try {
             final isAdmin = await _firestoreService.isCurrentUserAdmin();
@@ -269,13 +236,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 !errorString.contains('list<object?>')) {
               debugPrint('Erreur lors de la vérification du statut admin: $adminError');
             }
-            // Ne pas bloquer si la vérification admin échoue
           }
         }
         
-        // Charger les favoris même si appUser est null (on peut avoir des favoris sans profil complet)
         if (mounted && _user != null) {
-          // Délayer légèrement le chargement des favoris pour éviter les conflits
           Future.delayed(const Duration(milliseconds: 300), () {
             if (mounted) {
               _loadFavoriteMovies();
@@ -288,13 +252,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             errorString.contains('list<object?>') ||
             (errorString.contains('type') && errorString.contains('subtype'))) {
           debugPrint('Erreur Firebase interne ignorée: $e');
-          // Continuer avec un profil minimal
         } else {
           debugPrint('Erreur lors du chargement des données utilisateur: $e');
           debugPrint('Type d\'erreur: ${e.runtimeType}');
         }
         
-        // Si le profil n'existe pas encore, créer un profil minimal
         if (_appUser == null && _user != null) {
           try {
             debugPrint('Création d\'un profil minimal pour: ${_user!.uid}');
@@ -320,7 +282,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 !errorString.contains('list<object?>')) {
               debugPrint('Erreur lors de la création du profil minimal: $createError');
             }
-            // Même si la création échoue, on peut continuer avec un utilisateur minimal
             if (mounted && _appUser == null) {
               setState(() {
                 _appUser = AppUser(
@@ -446,7 +407,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       await FirebaseAuth.instance.signOut();
       debugPrint('✅ Déconnexion réussie');
       if (mounted) {
-        // Utiliser pushNamedAndRemoveUntil pour nettoyer complètement la pile de navigation
         Navigator.pushNamedAndRemoveUntil(
           context,
           '/login',
@@ -506,7 +466,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   builder: (context) => MovieDetailScreen(movie: movie),
                                   ),
                                 );
-              // Recharger les favoris après retour de la page de détails
               if (_user != null) {
                 _loadFavoriteMovies();
               }
@@ -517,7 +476,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Image du film
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.network(
@@ -540,7 +498,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                       ),
                                     ),
                                     const SizedBox(width: 16),
-                                    // Informations du film
                                     Expanded(
                                       child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -624,7 +581,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Tab(
               icon: const Icon(Icons.admin_panel_settings),
               text: 'Admin',
-              // Masquer visuellement si pas admin mais garder l'onglet
             ),
           ],
         ),
@@ -656,7 +612,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Onglet Films
           Column(
             children: [
               Padding(
@@ -697,7 +652,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ],
           ),
-          // Onglet Favoris
           Column(
             children: [
               if (_favoriteMovies.isEmpty && !_isLoadingFavorites)
@@ -742,12 +696,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
             ],
           ),
-          // Onglet Matching
           MatchingScreen(
             userId: _user?.uid ?? '',
             firestoreService: _firestoreService,
           ),
-          // Onglet Admin (afficher seulement si admin, sinon écran vide)
           _isAdmin
               ? AdminScreen(
                   movieService: _movieService,

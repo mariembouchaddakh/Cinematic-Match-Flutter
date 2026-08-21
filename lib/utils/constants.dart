@@ -18,11 +18,9 @@
 /// 
 /// Utilisation :
 /// ```dart
-/// AppConstants.errorNetwork  // Accéder à une constante
+/// AppConstants.errorNetwork 
 /// ```
 class AppConstants {
-  // ========== MESSAGES D'ERREUR ==========
-  // Section contenant tous les messages d'erreur affichés à l'utilisateur
   
   /// Message d'erreur générique pour les problèmes de réseau
   /// 
@@ -34,7 +32,7 @@ class AppConstants {
   /// - Les appels API (TMDb, Firestore)
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String errorNetwork = 'Erreur de connexion réseau'; // Message d'erreur réseau
+  static const String errorNetwork = 'Erreur de connexion réseau';
   
   /// Message d'erreur générique pour les erreurs inconnues
   /// 
@@ -45,10 +43,8 @@ class AppConstants {
   /// ne correspond à l'erreur rencontrée.
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String errorUnknown = 'Une erreur est survenue'; // Message d'erreur générique
+  static const String errorUnknown = 'Une erreur est survenue';
   
-  // ========== MESSAGES DE SUCCÈS ==========
-  // Section contenant tous les messages de succès affichés à l'utilisateur
   
   /// Message de succès affiché après une connexion réussie
   /// 
@@ -59,7 +55,7 @@ class AppConstants {
   /// - LoginScreen après une connexion réussie
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String successLogin = 'Connexion réussie !'; // Message de succès connexion
+  static const String successLogin = 'Connexion réussie !';
   
   /// Message de succès affiché après une inscription réussie
   /// 
@@ -70,10 +66,8 @@ class AppConstants {
   /// - SignUpScreen après une inscription réussie
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String successSignup = 'Inscription réussie !'; // Message de succès inscription
+  static const String successSignup = 'Inscription réussie !';
   
-  // ========== VALIDATION ==========
-  // Section contenant les paramètres de validation des formulaires
   
   /// Longueur minimale requise pour un mot de passe
   /// 
@@ -87,10 +81,8 @@ class AppConstants {
   /// Valeur actuelle : 6 caractères (minimum recommandé par Firebase)
   /// 
   /// Type : int (constante, ne change jamais)
-  static const int minPasswordLength = 6; // Longueur minimale du mot de passe (6 caractères)
+  static const int minPasswordLength = 6;
   
-  // ========== CONFIGURATION GÉNÉRALE ==========
-  // Section contenant les constantes générales de l'application
   
   /// Nom de l'application affiché dans l'interface
   /// 
@@ -100,11 +92,8 @@ class AppConstants {
   /// - La documentation
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String appName = 'Movie App'; // Nom de l'application
+  static const String appName = 'Movie App';
   
-  // ========== CONFIGURATION API TMDb ==========
-  // Section contenant la configuration de l'API The Movie Database (TMDb)
-  // TMDb est l'API principale utilisée pour récupérer les films
   
   /// Clé API pour The Movie Database (TMDb)
   /// 
@@ -128,7 +117,7 @@ class AppConstants {
   /// 
   /// ⚠️ IMPORTANT : Pour utiliser votre clé API locale, modifiez directement cette ligne
   /// ou utilisez le fichier constants.local.dart et remplacez cette valeur.
-  static const String tmdbApiKey = '163d0ee76e9574fd92df6be7c89948b2'; // Clé API TMDb
+  static const String tmdbApiKey = '163d0ee76e9574fd92df6be7c89948b2';
   
   /// URL de base de l'API TMDb
   /// 
@@ -141,7 +130,7 @@ class AppConstants {
   /// Version de l'API : v3 (actuelle)
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String tmdbBaseUrl = 'https://api.themoviedb.org/3'; // URL de base API TMDb v3
+  static const String tmdbBaseUrl = 'https://api.themoviedb.org/3';
   
   /// URL de base pour les images TMDb
   /// 
@@ -157,11 +146,8 @@ class AppConstants {
   /// Taille d'image : w500 (largeur 500px, qualité optimale pour l'affichage)
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String tmdbImageBaseUrl = 'https://image.tmdb.org/t/p/w500'; // URL de base images TMDb (500px)
+  static const String tmdbImageBaseUrl = 'https://image.tmdb.org/t/p/w500';
   
-  // ========== CONFIGURATION API RAPIDAPI (Alternative) ==========
-  // Section contenant la configuration de l'API RapidAPI (alternative à TMDb)
-  // Cette API n'est pas utilisée actuellement, mais reste disponible comme fallback
   
   /// Clé API pour RapidAPI (alternative à TMDb)
   /// 
@@ -182,7 +168,7 @@ class AppConstants {
   /// - Ne partagez jamais votre clé API publiquement
   /// 
   /// Type : String (constante, doit être remplacée si utilisée)
-  static const String rapidApiKey = 'YOUR_RAPIDAPI_KEY'; // Clé API RapidAPI (optionnel, non utilisé actuellement)
+  static const String rapidApiKey = 'YOUR_RAPIDAPI_KEY';
   
   /// Host de l'API RapidAPI
   /// 
@@ -193,7 +179,7 @@ class AppConstants {
   /// - Les en-têtes HTTP (X-RapidAPI-Host)
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String rapidApiHost = 'moviesdatabase.p.rapidapi.com'; // Host API RapidAPI
+  static const String rapidApiHost = 'moviesdatabase.p.rapidapi.com';
   
   /// URL de base de l'API RapidAPI
   /// 
@@ -204,5 +190,5 @@ class AppConstants {
   /// comme fallback si TMDb n'est pas configuré.
   /// 
   /// Type : String (constante, ne change jamais)
-  static const String rapidApiBaseUrl = 'https://moviesdatabase.p.rapidapi.com'; // URL de base API RapidAPI
+  static const String rapidApiBaseUrl = 'https://moviesdatabase.p.rapidapi.com';
 }

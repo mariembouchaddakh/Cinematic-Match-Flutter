@@ -18,15 +18,10 @@
 /// 
 /// Note : Un utilisateur désactivé ne peut plus se connecter à l'application
 
-// Import du package Flutter Material pour les widgets UI (Scaffold, AppBar, Dialog, etc.)
 import 'package:flutter/material.dart';
-// Import du modèle Movie pour créer des instances de films
 import '../models/movie.dart';
-// Import du modèle AppUser pour gérer les utilisateurs
 import '../models/user.dart';
-// Import du service MovieService pour gérer les films
 import '../services/movie_service.dart';
-// Import du service FirestoreService pour les opérations de base de données
 import '../services/firestore_service.dart';
 
 /// Widget StatefulWidget pour l'écran d'administration
@@ -60,10 +55,10 @@ class AdminScreen extends StatefulWidget {
   /// - required this.firestoreService : Service Firestore (obligatoire)
   /// - required this.onMoviesUpdated : Callback de mise à jour (obligatoire)
   const AdminScreen({
-    super.key, // Clé du widget parent, passée au constructeur parent
-    required this.movieService, // Service de gestion des films (obligatoire)
-    required this.firestoreService, // Service Firestore (obligatoire)
-    required this.onMoviesUpdated, // Callback de mise à jour (obligatoire)
+    super.key,
+    required this.movieService,
+    required this.firestoreService,
+    required this.onMoviesUpdated,
   });
 
   /// Méthode createState : Crée l'état associé à ce widget
@@ -73,7 +68,7 @@ class AdminScreen extends StatefulWidget {
   /// 
   /// Retourne : Une instance de _AdminScreenState qui gère l'état de ce widget
   @override
-  State<AdminScreen> createState() => _AdminScreenState(); // Créer et retourner l'état du widget
+  State<AdminScreen> createState() => _AdminScreenState();
 }
 
 /// Classe d'état pour AdminScreen
@@ -90,7 +85,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// Il est initialisé avec 2 onglets dans initState().
   /// 
   /// late : Initialisé dans initState(), pas à la déclaration
-  late TabController _tabController; // Contrôleur pour les onglets (initialisé dans initState)
+  late TabController _tabController;
   
   /// Liste de tous les utilisateurs de l'application
   /// 
@@ -98,7 +93,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// Elle contient tous les utilisateurs (admin et user).
   /// 
   /// Initialisée à une liste vide [] au démarrage
-  List<AppUser> _users = []; // Liste vide au démarrage, remplie par _loadUsers()
+  List<AppUser> _users = [];
   
   /// Indicateur de chargement pour la liste des utilisateurs
   /// 
@@ -106,7 +101,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// false : Les utilisateurs sont chargés (afficher la liste)
   /// 
   /// Initialisé à false car on charge les utilisateurs dans initState()
-  bool _isLoadingUsers = false; // Indicateur de chargement (false au démarrage)
+  bool _isLoadingUsers = false;
 
   /// Méthode initState : Appelée une seule fois lors de la création du widget
   /// 
@@ -119,18 +114,11 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// 3. Charger la liste des utilisateurs
   @override
   void initState() {
-    // Appeler super.initState() est OBLIGATOIRE
-    // Cette méthode initialise l'état du widget parent (State<AdminScreen>)
-    super.initState(); // Initialiser l'état du widget parent
+    super.initState();
     
-    // Initialiser le TabController pour gérer les 2 onglets
-    // length: 2 : Nombre d'onglets (Ajouter un film, Gérer les utilisateurs)
-    // vsync: this : Fournit le Ticker pour les animations (via SingleTickerProviderStateMixin)
-    _tabController = TabController(length: 2, vsync: this); // Créer le contrôleur avec 2 onglets
+    _tabController = TabController(length: 2, vsync: this);
     
-    // Charger immédiatement la liste des utilisateurs
-    // Cette méthode récupère tous les utilisateurs depuis Firestore
-    _loadUsers(); // Charger les utilisateurs depuis Firestore
+    _loadUsers();
   }
 
   /// Méthode asynchrone pour charger tous les utilisateurs depuis Firestore
@@ -143,41 +131,25 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// 
   /// Retourne : Future<void> (méthode asynchrone)
   Future<void> _loadUsers() async {
-    // Mettre à jour l'état pour afficher l'indicateur de chargement
-    // setState() déclenche un rebuild du widget avec les nouvelles valeurs
     setState(() {
-      _isLoadingUsers = true; // Activer l'indicateur de chargement
+      _isLoadingUsers = true;
     });
 
-    // Bloc try-catch pour gérer les erreurs potentielles
     try {
-      // Récupérer tous les utilisateurs depuis Firestore
-      // widget.firestoreService : Accès au service Firestore passé en paramètre
-      // getAllUsers() : Méthode qui récupère tous les documents de la collection "users"
-      // await : Attendre que la requête Firestore se termine
-      final users = await widget.firestoreService.getAllUsers(); // Récupérer tous les utilisateurs
+      final users = await widget.firestoreService.getAllUsers();
       
-      // Mettre à jour l'état avec les utilisateurs récupérés
       setState(() {
-        _users = users; // Stocker la liste des utilisateurs
-        _isLoadingUsers = false; // Désactiver l'indicateur de chargement
+        _users = users;
+        _isLoadingUsers = false;
       });
     } catch (e) {
-      // En cas d'erreur, désactiver l'indicateur de chargement
       setState(() {
-        _isLoadingUsers = false; // Désactiver l'indicateur même en cas d'erreur
+        _isLoadingUsers = false;
       });
       
-      // Vérifier que le widget est toujours monté (pas détruit)
-      // mounted : Propriété qui indique si le widget est encore dans l'arbre de widgets
       if (mounted) {
-        // Afficher un message d'erreur à l'utilisateur
-        // ScaffoldMessenger : Gère l'affichage des SnackBar (messages en bas de l'écran)
-        // of(context) : Récupère le ScaffoldMessenger associé au contexte
-        // showSnackBar() : Affiche un message SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
-          // SnackBar : Widget qui affiche un message temporaire en bas de l'écran
-          SnackBar(content: Text('Erreur lors du chargement des utilisateurs: $e')), // Message d'erreur avec détails
+          SnackBar(content: Text('Erreur lors du chargement des utilisateurs: $e')),
         );
       }
     }
@@ -194,181 +166,131 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// 
   /// Retourne : Future<void> (méthode asynchrone)
   Future<void> _showAddMovieDialog() async {
-    // Créer des contrôleurs pour chaque champ du formulaire
-    // TextEditingController : Gère le texte saisi dans un TextField
-    final titleController = TextEditingController(); // Contrôleur pour le champ titre
-    final descriptionController = TextEditingController(); // Contrôleur pour le champ description
-    final imageUrlController = TextEditingController(); // Contrôleur pour le champ URL image
-    final ratingController = TextEditingController(); // Contrôleur pour le champ note
-    final yearController = TextEditingController(); // Contrôleur pour le champ année
-    final genreController = TextEditingController(); // Contrôleur pour le champ genre
-    final directorController = TextEditingController(); // Contrôleur pour le champ réalisateur
+    final titleController = TextEditingController();
+    final descriptionController = TextEditingController();
+    final imageUrlController = TextEditingController();
+    final ratingController = TextEditingController();
+    final yearController = TextEditingController();
+    final genreController = TextEditingController();
+    final directorController = TextEditingController();
 
-    // Afficher un dialogue modal (bloque l'interface jusqu'à fermeture)
-    // showDialog() : Affiche un dialogue modal
-    // context : Contexte du widget (nécessaire pour afficher le dialogue)
-    // builder : Fonction qui construit le contenu du dialogue
     await showDialog(
-      context: context, // Contexte du widget actuel
-      // builder : Fonction appelée pour construire le dialogue
-      // (context) => AlertDialog(...) : Fonction anonyme qui retourne un AlertDialog
+      context: context,
       builder: (context) => AlertDialog(
-        // title : Titre du dialogue (affiché en haut)
-        title: const Text('Ajouter un film'), // Texte constant "Ajouter un film"
-        // content : Contenu principal du dialogue (le formulaire)
+        title: const Text('Ajouter un film'),
         content: SingleChildScrollView(
-          // SingleChildScrollView : Permet de faire défiler le contenu si trop long
           child: Column(
-            // Column : Widget qui organise ses enfants verticalement
-            mainAxisSize: MainAxisSize.min, // Taille minimale (s'adapte au contenu)
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Liste des widgets enfants (champs du formulaire)
-              // Champ Titre
               TextField(
-                // TextField : Champ de saisie de texte
-                controller: titleController, // Contrôleur qui gère le texte saisi
+                controller: titleController,
                 decoration: const InputDecoration(
-                  // InputDecoration : Style et labels du champ
-                  labelText: 'Titre', // Label affiché au-dessus du champ
-                  border: OutlineInputBorder(), // Bordure avec contour
+                  labelText: 'Titre',
+                  border: OutlineInputBorder(),
                 ),
               ),
-              // Espacement vertical de 12 pixels entre les champs
-              const SizedBox(height: 12), // Espacement de 12 pixels
-              // Champ Description
+              const SizedBox(height: 12),
               TextField(
-                controller: descriptionController, // Contrôleur pour la description
+                controller: descriptionController,
                 decoration: const InputDecoration(
-                  labelText: 'Description', // Label "Description"
-                  border: OutlineInputBorder(), // Bordure avec contour
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
                 ),
-                maxLines: 3, // Permettre 3 lignes de texte (champ multiligne)
+                maxLines: 3,
               ),
-              const SizedBox(height: 12), // Espacement de 12 pixels
-              // Champ URL de l'image
+              const SizedBox(height: 12),
               TextField(
-                controller: imageUrlController, // Contrôleur pour l'URL de l'image
+                controller: imageUrlController,
                 decoration: const InputDecoration(
-                  labelText: 'URL de l\'image', // Label "URL de l'image"
-                  border: OutlineInputBorder(), // Bordure avec contour
+                  labelText: 'URL de l\'image',
+                  border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 12), // Espacement de 12 pixels
-              // Champ Note
+              const SizedBox(height: 12),
               TextField(
-                controller: ratingController, // Contrôleur pour la note
+                controller: ratingController,
                 decoration: const InputDecoration(
-                  labelText: 'Note (0-10)', // Label "Note (0-10)"
-                  border: OutlineInputBorder(), // Bordure avec contour
+                  labelText: 'Note (0-10)',
+                  border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.number, // Clavier numérique pour faciliter la saisie
+                keyboardType: TextInputType.number,
               ),
-              const SizedBox(height: 12), // Espacement de 12 pixels
-              // Champ Année
+              const SizedBox(height: 12),
               TextField(
-                controller: yearController, // Contrôleur pour l'année
+                controller: yearController,
                 decoration: const InputDecoration(
-                  labelText: 'Année', // Label "Année"
-                  border: OutlineInputBorder(), // Bordure avec contour
+                  labelText: 'Année',
+                  border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.number, // Clavier numérique
+                keyboardType: TextInputType.number,
               ),
-              const SizedBox(height: 12), // Espacement de 12 pixels
-              // Champ Genre
+              const SizedBox(height: 12),
               TextField(
-                controller: genreController, // Contrôleur pour le genre
+                controller: genreController,
                 decoration: const InputDecoration(
-                  labelText: 'Genre', // Label "Genre"
-                  border: OutlineInputBorder(), // Bordure avec contour
+                  labelText: 'Genre',
+                  border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 12), // Espacement de 12 pixels
-              // Champ Réalisateur
+              const SizedBox(height: 12),
               TextField(
-                controller: directorController, // Contrôleur pour le réalisateur
+                controller: directorController,
                 decoration: const InputDecoration(
-                  labelText: 'Réalisateur', // Label "Réalisateur"
-                  border: OutlineInputBorder(), // Bordure avec contour
+                  labelText: 'Réalisateur',
+                  border: OutlineInputBorder(),
                 ),
               ),
             ],
           ),
         ),
-        // actions : Boutons d'action en bas du dialogue
         actions: [
-          // Bouton Annuler
           TextButton(
-            // TextButton : Bouton avec texte (style simple)
-            onPressed: () => Navigator.pop(context), // Fermer le dialogue sans action
-            child: const Text('Annuler'), // Texte du bouton
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
           ),
-          // Bouton Ajouter
           ElevatedButton(
-            // ElevatedButton : Bouton avec élévation (style Material Design)
             onPressed: () async {
-              // Fonction asynchrone appelée quand on clique sur "Ajouter"
-              // Vérifier que le titre n'est pas vide (champ requis)
               if (titleController.text.isEmpty) {
-                // Afficher un message d'erreur
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Le titre est requis')), // Message d'erreur
+                  const SnackBar(content: Text('Le titre est requis')),
                 );
-                return; // Sortir de la fonction sans créer le film
+                return;
               }
 
-              // Créer une instance Movie avec les données du formulaire
               final movie = Movie(
-                // id : Identifiant unique du film (timestamp en millisecondes)
-                id: DateTime.now().millisecondsSinceEpoch.toString(), // ID basé sur le timestamp actuel
-                // title : Titre du film (depuis le champ titre)
-                title: titleController.text, // Texte saisi dans le champ titre
-                // description : Description du film (depuis le champ description)
-                description: descriptionController.text, // Texte saisi dans le champ description
-                // imageUrl : URL de l'affiche du film
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                title: titleController.text,
+                description: descriptionController.text,
                 imageUrl: imageUrlController.text.isEmpty
-                    ? 'https://via.placeholder.com/500x750?text=No+Image' // URL par défaut si vide
-                    : imageUrlController.text, // URL saisie si non vide
-                // rating : Note du film (convertie en double, 0.0 par défaut)
-                rating: double.tryParse(ratingController.text) ?? 0.0, // Convertir en double ou 0.0
-                // year : Année de sortie (convertie en int, 0 par défaut)
-                year: int.tryParse(yearController.text) ?? 0, // Convertir en int ou 0
-                // genre : Genre du film (ou "Non spécifié" si vide)
-                genre: genreController.text.isEmpty ? 'Non spécifié' : genreController.text, // Genre ou valeur par défaut
-                // director : Réalisateur (ou "Non spécifié" si vide)
-                director: directorController.text.isEmpty ? 'Non spécifié' : directorController.text, // Réalisateur ou valeur par défaut
+                    ? 'https://via.placeholder.com/500x750?text=No+Image'
+                    : imageUrlController.text,
+                rating: double.tryParse(ratingController.text) ?? 0.0,
+                year: int.tryParse(yearController.text) ?? 0,
+                genre: genreController.text.isEmpty ? 'Non spécifié' : genreController.text,
+                director: directorController.text.isEmpty ? 'Non spécifié' : directorController.text,
               );
 
-              // Bloc try-catch pour gérer les erreurs lors de l'ajout
               try {
-                // Ajouter le film dans Firestore
-                // widget.firestoreService : Service Firestore passé en paramètre
-                // addMovie() : Méthode qui crée un document dans la collection "movies"
-                // await : Attendre que l'opération Firestore se termine
-                await widget.firestoreService.addMovie(movie); // Ajouter le film dans Firestore
+                await widget.firestoreService.addMovie(movie);
                 
-                // Vérifier que le widget est toujours monté
                 if (mounted) {
-                  // Fermer le dialogue
-                  Navigator.pop(context); // Fermer le dialogue modal
+                  Navigator.pop(context);
                   
-                  // Appeler le callback pour rafraîchir la liste des films
-                  widget.onMoviesUpdated(); // Notifier HomeScreen de mettre à jour la liste
+                  widget.onMoviesUpdated();
                   
-                  // Afficher un message de succès
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Film ajouté avec succès')), // Message de succès
+                    const SnackBar(content: Text('Film ajouté avec succès')),
                   );
                 }
               } catch (e) {
-                // En cas d'erreur, afficher un message d'erreur
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e')), // Message d'erreur avec détails
+                    SnackBar(content: Text('Erreur: $e')),
                   );
                 }
               }
             },
-            child: const Text('Ajouter'), // Texte du bouton
+            child: const Text('Ajouter'),
           ),
         ],
       ),
@@ -389,47 +311,29 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// 
   /// Retourne : Future<void> (méthode asynchrone)
   Future<void> _toggleUserStatus(AppUser user) async {
-    // Bloc try-catch pour gérer les erreurs potentielles
     try {
-      // Vérifier si l'utilisateur est actuellement actif
       if (user.isActive) {
-        // Si actif, le désactiver
-        // widget.firestoreService : Service Firestore passé en paramètre
-        // disableUser() : Méthode qui met isActive à false dans Firestore
-        // await : Attendre que l'opération Firestore se termine
-        await widget.firestoreService.disableUser(user.id); // Désactiver l'utilisateur
+        await widget.firestoreService.disableUser(user.id);
         
-        // Vérifier que le widget est toujours monté
         if (mounted) {
-          // Afficher un message de confirmation
           ScaffoldMessenger.of(context).showSnackBar(
-            // Message avec le nom complet de l'utilisateur désactivé
-            SnackBar(content: Text('${user.firstName} ${user.lastName} a été désactivé')), // Message de confirmation
+            SnackBar(content: Text('${user.firstName} ${user.lastName} a été désactivé')),
           );
         }
       } else {
-        // Si inactif, l'activer
-        // widget.firestoreService : Service Firestore passé en paramètre
-        // enableUser() : Méthode qui met isActive à true dans Firestore
-        // await : Attendre que l'opération Firestore se termine
-        await widget.firestoreService.enableUser(user.id); // Activer l'utilisateur
+        await widget.firestoreService.enableUser(user.id);
         
-        // Vérifier que le widget est toujours monté
         if (mounted) {
-          // Afficher un message de confirmation
           ScaffoldMessenger.of(context).showSnackBar(
-            // Message avec le nom complet de l'utilisateur activé
-            SnackBar(content: Text('${user.firstName} ${user.lastName} a été activé')), // Message de confirmation
+            SnackBar(content: Text('${user.firstName} ${user.lastName} a été activé')),
           );
         }
       }
-      // Recharger la liste des utilisateurs pour afficher les changements
-      _loadUsers(); // Rafraîchir la liste des utilisateurs
+      _loadUsers();
     } catch (e) {
-      // En cas d'erreur, afficher un message d'erreur
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')), // Message d'erreur avec détails
+          SnackBar(content: Text('Erreur: $e')),
         );
       }
     }
@@ -446,140 +350,110 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// Retourne : Un widget Column avec TabBar et TabBarView
   @override
   Widget build(BuildContext context) {
-    // Retourner un Column qui organise ses enfants verticalement
     return Column(
       children: [
-        // TabBar : Barre d'onglets en haut de l'écran
         TabBar(
-          controller: _tabController, // Contrôleur qui gère les onglets
+          controller: _tabController,
           tabs: const [
-            // Premier onglet : Ajouter un film
-            Tab(icon: Icon(Icons.add_circle), text: 'Ajouter un film'), // Onglet avec icône et texte
-            // Deuxième onglet : Gérer les utilisateurs
-            Tab(icon: Icon(Icons.people), text: 'Gérer les utilisateurs'), // Onglet avec icône et texte
+            Tab(icon: Icon(Icons.add_circle), text: 'Ajouter un film'),
+            Tab(icon: Icon(Icons.people), text: 'Gérer les utilisateurs'),
           ],
         ),
-        // Expanded : Prend tout l'espace disponible restant
         Expanded(
           child: TabBarView(
-            // TabBarView : Contenu de chaque onglet (synchronisé avec TabBar)
-            controller: _tabController, // Même contrôleur que TabBar
+            controller: _tabController,
             children: [
-              // Contenu du premier onglet : Ajouter un film
               Padding(
-                // Padding : Ajoute un espacement de 16 pixels de tous les côtés
-                padding: const EdgeInsets.all(16.0), // Espacement de 16 pixels
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  // Column : Organise ses enfants verticalement
-                  mainAxisAlignment: MainAxisAlignment.center, // Centrer verticalement
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Icône de film (grande taille)
                     const Icon(
-                      Icons.movie_creation, // Icône de création de film
-                      size: 80, // Taille de 80 pixels
-                      color: Colors.blue, // Couleur bleue
+                      Icons.movie_creation,
+                      size: 80,
+                      color: Colors.blue,
                     ),
-                    // Espacement vertical de 20 pixels
-                    const SizedBox(height: 20), // Espacement de 20 pixels
-                    // Texte titre
+                    const SizedBox(height: 20),
                     const Text(
-                      'Ajouter un nouveau film', // Texte du titre
+                      'Ajouter un nouveau film',
                       style: TextStyle(
-                        fontSize: 20, // Taille de police 20
-                        fontWeight: FontWeight.bold, // Texte en gras
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    // Espacement vertical de 20 pixels
-                    const SizedBox(height: 20), // Espacement de 20 pixels
-                    // Bouton pour ouvrir le dialogue d'ajout
+                    const SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: _showAddMovieDialog, // Appeler la méthode qui affiche le dialogue
-                      icon: const Icon(Icons.add), // Icône "+"
-                      label: const Text('Ajouter un film'), // Texte du bouton
+                      onPressed: _showAddMovieDialog,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Ajouter un film'),
                       style: ElevatedButton.styleFrom(
-                        // Style personnalisé du bouton
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 24, // Espacement horizontal de 24 pixels
-                          vertical: 12, // Espacement vertical de 12 pixels
+                          horizontal: 24,
+                          vertical: 12,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              // Contenu du deuxième onglet : Gérer les utilisateurs
-              // Opérateur ternaire : Afficher un spinner si chargement, sinon la liste
               _isLoadingUsers
-                  ? const Center(child: CircularProgressIndicator()) // Indicateur de chargement centré
+                  ? const Center(child: CircularProgressIndicator())
                   : _users.isEmpty
                       ? const Center(
-                          // Si aucun utilisateur, afficher un message
-                          child: Text('Aucun utilisateur trouvé'), // Message "Aucun utilisateur trouvé"
+                          child: Text('Aucun utilisateur trouvé'),
                         )
                       : ListView.builder(
-                          // ListView.builder : Crée une liste défilable optimisée
-                          padding: const EdgeInsets.all(16.0), // Espacement de 16 pixels
-                          itemCount: _users.length, // Nombre d'éléments dans la liste
+                          padding: const EdgeInsets.all(16.0),
+                          itemCount: _users.length,
                           itemBuilder: (context, index) {
-                            // Fonction appelée pour chaque élément de la liste
-                            // index : Index de l'élément actuel (0, 1, 2, ...)
-                            final user = _users[index]; // Récupérer l'utilisateur à l'index actuel
+                            final user = _users[index];
                             
-                            // Retourner une Card pour chaque utilisateur
                             return Card(
-                              margin: const EdgeInsets.only(bottom: 12), // Marge en bas de 12 pixels
+                              margin: const EdgeInsets.only(bottom: 12),
                               child: ListTile(
-                                // ListTile : Widget Material Design pour afficher une ligne de liste
                                 leading: CircleAvatar(
-                                  // CircleAvatar : Avatar circulaire (photo de profil)
                                   backgroundImage: user.photoUrl != null
-                                      ? NetworkImage(user.photoUrl!) // Image depuis l'URL si disponible
-                                      : null, // Pas d'image si photoUrl est null
+                                      ? NetworkImage(user.photoUrl!)
+                                      : null,
                                   child: user.photoUrl == null
                                       ? Text(
-                                          // Afficher l'initiale si pas de photo
                                           user.firstName.isNotEmpty
-                                              ? user.firstName[0].toUpperCase() // Première lettre du prénom
+                                              ? user.firstName[0].toUpperCase()
                                               : user.email.isNotEmpty
-                                                  ? user.email[0].toUpperCase() // Première lettre de l'email
-                                                  : 'U', // 'U' par défaut
+                                                  ? user.email[0].toUpperCase()
+                                                  : 'U',
                                         )
-                                      : null, // Pas de texte si photo disponible
+                                      : null,
                                 ),
-                                title: Text('${user.firstName} ${user.lastName}'), // Nom complet
+                                title: Text('${user.firstName} ${user.lastName}'),
                                 subtitle: Column(
-                                  // Column : Organise les informations verticalement
-                                  crossAxisAlignment: CrossAxisAlignment.start, // Aligner à gauche
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(user.email), // Email de l'utilisateur
+                                    Text(user.email),
                                     Text(
-                                      // Afficher l'âge ou "Non spécifié"
                                       user.age > 0 
-                                          ? 'Âge: ${user.age} ans' // Âge si > 0
-                                          : 'Âge: Non spécifié', // Message par défaut
+                                          ? 'Âge: ${user.age} ans'
+                                          : 'Âge: Non spécifié',
                                     ),
-                                    Text('Rôle: ${user.role}'), // Rôle (admin ou user)
+                                    Text('Rôle: ${user.role}'),
                                     Text(
-                                      // Statut actif/désactivé avec couleur
-                                      user.isActive ? 'Actif' : 'Désactivé', // Texte selon l'état
+                                      user.isActive ? 'Actif' : 'Désactivé',
                                       style: TextStyle(
-                                        color: user.isActive ? Colors.green : Colors.red, // Vert si actif, rouge si désactivé
-                                        fontWeight: FontWeight.bold, // Texte en gras
+                                        color: user.isActive ? Colors.green : Colors.red,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ],
                                 ),
                                 trailing: IconButton(
-                                  // IconButton : Bouton avec icône à droite
                                   icon: Icon(
-                                    // Icône selon l'état (block si actif, check si désactivé)
-                                    user.isActive ? Icons.block : Icons.check_circle, // Icône conditionnelle
-                                    color: user.isActive ? Colors.red : Colors.green, // Couleur conditionnelle
+                                    user.isActive ? Icons.block : Icons.check_circle,
+                                    color: user.isActive ? Colors.red : Colors.green,
                                   ),
-                                  onPressed: () => _toggleUserStatus(user), // Appeler la méthode de bascule
+                                  onPressed: () => _toggleUserStatus(user),
                                   tooltip: user.isActive
-                                      ? 'Désactiver l\'utilisateur' // Tooltip si actif
-                                      : 'Activer l\'utilisateur', // Tooltip si désactivé
+                                      ? 'Désactiver l\'utilisateur'
+                                      : 'Activer l\'utilisateur',
                                 ),
                               ),
                             );
@@ -602,9 +476,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   /// 2. Appeler super.dispose() (obligatoire)
   @override
   void dispose() {
-    // Libérer le TabController pour éviter les fuites mémoire
-    _tabController.dispose(); // Libérer les ressources du contrôleur
-    // Appeler super.dispose() est OBLIGATOIRE
-    super.dispose(); // Libérer les ressources du widget parent
+    _tabController.dispose();
+    super.dispose();
   }
 }

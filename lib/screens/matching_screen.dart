@@ -84,7 +84,6 @@ class _MatchingScreenState extends State<MatchingScreen> {
           _isLoading = false;
         });
         
-        // Vérifier si c'est une erreur de permission
         final errorString = e.toString().toLowerCase();
         if (errorString.contains('permission') || errorString.contains('denied')) {
           ScaffoldMessenger.of(context).showSnackBar(

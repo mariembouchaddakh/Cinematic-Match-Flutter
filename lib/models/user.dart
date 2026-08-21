@@ -22,7 +22,7 @@ class AppUser {
   /// Il est utilisé comme ID du document dans Firestore (collection "users").
   /// 
   /// Type : String (non nullable, toujours présent)
-  final String id; // Identifiant unique Firebase Auth (requis)
+  final String id;
   
   /// Adresse email de l'utilisateur
   /// 
@@ -30,7 +30,7 @@ class AppUser {
   /// Doit être unique dans la base de données.
   /// 
   /// Type : String (non nullable, toujours présent)
-  final String email; // Email de l'utilisateur (requis)
+  final String email;
   
   /// Prénom de l'utilisateur
   /// 
@@ -38,7 +38,7 @@ class AppUser {
   /// Utilisé pour l'affichage du profil et les messages personnalisés.
   /// 
   /// Type : String (non nullable, peut être vide "")
-  final String firstName; // Prénom de l'utilisateur (requis)
+  final String firstName;
   
   /// Nom de famille de l'utilisateur
   /// 
@@ -46,7 +46,7 @@ class AppUser {
   /// Utilisé avec firstName pour former le nom complet.
   /// 
   /// Type : String (non nullable, peut être vide "")
-  final String lastName; // Nom de famille de l'utilisateur (requis)
+  final String lastName;
   
   /// Âge de l'utilisateur (0 si non spécifié)
   /// 
@@ -54,7 +54,7 @@ class AppUser {
   /// Utilisé pour le matching et l'affichage du profil.
   /// 
   /// Type : int (non nullable, 0 par défaut si non spécifié)
-  final int age; // Âge de l'utilisateur (requis, peut être 0)
+  final int age;
   
   /// URL de la photo de profil (null si aucune photo)
   /// 
@@ -62,7 +62,7 @@ class AppUser {
   /// Si null, l'interface affiche une initiale ou une icône par défaut.
   /// 
   /// Type : String? (nullable, optionnel)
-  final String? photoUrl; // URL de la photo de profil (optionnel, peut être null)
+  final String? photoUrl;
   
   /// Rôle de l'utilisateur : 'admin' ou 'user'
   /// 
@@ -71,7 +71,7 @@ class AppUser {
   /// - 'user' : Utilisateur standard (par défaut)
   /// 
   /// Type : String (non nullable, 'user' par défaut)
-  final String role; // Rôle de l'utilisateur (optionnel, 'user' par défaut)
+  final String role;
   
   /// Statut actif/désactivé de l'utilisateur
   /// 
@@ -79,7 +79,7 @@ class AppUser {
   /// Utilisé par les administrateurs pour gérer les comptes.
   /// 
   /// Type : bool (non nullable, true par défaut)
-  final bool isActive; // Statut actif/désactivé (optionnel, true par défaut)
+  final bool isActive;
   
   /// Liste des IDs des films favoris de l'utilisateur
   /// 
@@ -89,7 +89,7 @@ class AppUser {
   /// - Calculer le matching avec d'autres utilisateurs
   /// 
   /// Type : List<String> (non nullable, liste vide par défaut)
-  final List<String> favoriteMovies; // Liste des IDs des films favoris (optionnel, [] par défaut)
+  final List<String> favoriteMovies;
 
   /// Constructeur du modèle AppUser
   /// 
@@ -110,16 +110,16 @@ class AppUser {
   /// Si favoriteMovies est null, utilise une liste vide [].
   /// Sinon, utilise la liste fournie.
   AppUser({
-    required this.id, // ID Firebase Auth (obligatoire)
-    required this.email, // Email (obligatoire)
-    required this.firstName, // Prénom (obligatoire)
-    required this.lastName, // Nom (obligatoire)
-    required this.age, // Âge (obligatoire)
-    this.photoUrl, // URL photo (optionnel, peut être null)
-    this.role = 'user', // Rôle (optionnel, 'user' par défaut)
-    this.isActive = true, // Statut actif (optionnel, true par défaut)
-    List<String>? favoriteMovies, // Liste favoris (optionnel, nullable)
-  }) : favoriteMovies = favoriteMovies ?? []; // Initialiser favoriteMovies : liste fournie ou [] si null
+    required this.id,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+    required this.age,
+    this.photoUrl,
+    this.role = 'user',
+    this.isActive = true,
+    List<String>? favoriteMovies,
+  }) : favoriteMovies = favoriteMovies ?? [];
 
   /// Factory constructor : Crée une instance AppUser à partir d'un JSON Firestore
   /// 
@@ -140,98 +140,57 @@ class AppUser {
   /// - Si age n'est pas un int, essaie de le convertir depuis String
   /// - Si isActive n'est pas un bool, essaie de le convertir depuis String
   factory AppUser.fromJson(Map<String, dynamic> json, String id) {
-    // ========== GESTION DE favoriteMovies ==========
-    // Le champ favoriteMovies peut être absent, null, ou de type différent dans Firestore
-    // Il faut le gérer de manière sécurisée pour éviter les erreurs de type
     
-    // Initialiser une liste vide par défaut
-    List<String> favoriteMoviesList = []; // Liste vide par défaut
+    List<String> favoriteMoviesList = [];
     
-    // Vérifier si le champ favoriteMovies existe et n'est pas null
     if (json['favoriteMovies'] != null) {
-      // Bloc try-catch pour gérer les erreurs de conversion
       try {
-        // Récupérer les données brutes du champ favoriteMovies
-        final favoriteMoviesData = json['favoriteMovies']; // Données brutes depuis JSON
+        final favoriteMoviesData = json['favoriteMovies'];
         
-        // Vérifier que c'est bien une liste (peut être List<dynamic>, List<String>, etc.)
         if (favoriteMoviesData is List) {
-          // Convertir chaque élément en string et filtrer les vides
-          // map() : Transforme chaque élément de la liste
-          // item?.toString() ?? '' : Convertit en string, ou '' si null
-          // where() : Filtre les éléments vides
-          // toList() : Convertit l'itérable en liste
           favoriteMoviesList = favoriteMoviesData
-              .map((item) => item?.toString() ?? '') // Convertir chaque élément en string
-              .where((item) => item.isNotEmpty) // Filtrer les chaînes vides
-              .toList(); // Convertir en liste finale
+              .map((item) => item?.toString() ?? '')
+              .where((item) => item.isNotEmpty)
+              .toList();
         }
       } catch (e) {
-        // En cas d'erreur de conversion, utiliser une liste vide
-        // print() : Affiche l'erreur dans la console pour le débogage
-        print('Erreur lors de la conversion de favoriteMovies: $e'); // Log de l'erreur
-        favoriteMoviesList = []; // Utiliser une liste vide en cas d'erreur
+        print('Erreur lors de la conversion de favoriteMovies: $e');
+        favoriteMoviesList = [];
       }
     }
 
-    // ========== GESTION DE age ==========
-    // Le champ age peut être absent, null, int, ou string dans Firestore
-    // Il faut le gérer de manière sécurisée
     
-    // Initialiser à 0 par défaut
-    int userAge = 0; // Âge par défaut : 0
+    int userAge = 0;
     
-    // Vérifier si le champ age existe et n'est pas null
     if (json['age'] != null) {
-      // Vérifier le type de la valeur
       if (json['age'] is int) {
-        // Type correct (int), utiliser directement
-        userAge = json['age']; // Assigner directement la valeur int
+        userAge = json['age'];
       } else if (json['age'] is String) {
-        // Type string, convertir en int
-        // int.tryParse() : Essaie de convertir la string en int
-        // ?? 0 : Si la conversion échoue, utiliser 0
-        userAge = int.tryParse(json['age']) ?? 0; // Convertir depuis string ou 0
+        userAge = int.tryParse(json['age']) ?? 0;
       }
     }
 
-    // ========== GESTION DE isActive ==========
-    // Le champ isActive peut être absent, null, bool, ou string dans Firestore
-    // Il faut le gérer de manière sécurisée
     
-    // Initialiser à true par défaut (utilisateur actif par défaut)
-    bool userIsActive = true; // Statut actif par défaut : true
+    bool userIsActive = true;
     
-    // Vérifier si le champ isActive existe et n'est pas null
     if (json['isActive'] != null) {
-      // Vérifier le type de la valeur
       if (json['isActive'] is bool) {
-        // Type correct (bool), utiliser directement
-        userIsActive = json['isActive']; // Assigner directement la valeur bool
+        userIsActive = json['isActive'];
       } else if (json['isActive'] is String) {
-        // Type string, convertir en bool
-        // toLowerCase() : Convertir en minuscules pour la comparaison
-        // == 'true' : Comparer avec la string 'true'
-        userIsActive = json['isActive'].toLowerCase() == 'true'; // Convertir depuis string
+        userIsActive = json['isActive'].toLowerCase() == 'true';
       }
     }
 
-    // Créer et retourner une instance AppUser avec les données parsées
     return AppUser(
-      id: id, // ID du document Firestore (passé en paramètre)
-      // email : Convertir en string, ou '' si null
-      email: json['email']?.toString() ?? '', // Email ou chaîne vide
-      // firstName : Convertir en string, ou '' si null
-      firstName: json['firstName']?.toString() ?? '', // Prénom ou chaîne vide
-      // lastName : Convertir en string, ou '' si null
-      lastName: json['lastName']?.toString() ?? '', // Nom ou chaîne vide
-      age: userAge, // Âge parsé (0 si absent ou invalide)
-      // photoUrl : Convertir en string, ou null si absent
-      photoUrl: json['photoUrl']?.toString(), // URL photo ou null
-      // role : Convertir en string, ou 'user' par défaut
-      role: json['role']?.toString() ?? 'user', // Rôle ou 'user' par défaut
-      isActive: userIsActive, // Statut actif parsé (true par défaut)
-      favoriteMovies: favoriteMoviesList, // Liste des favoris parsée ([] par défaut)
+      id: id,
+      email: json['email']?.toString() ?? '',
+      firstName: json['firstName']?.toString() ?? '',
+      lastName: json['lastName']?.toString() ?? '',
+      age: userAge,
+      photoUrl: json['photoUrl']?.toString(),
+      role: json['role']?.toString() ?? 'user',
+      isActive: userIsActive,
+      favoriteMovies: favoriteMoviesList,
     );
   }
 
@@ -249,16 +208,15 @@ class AppUser {
   /// Note : L'ID n'est pas inclus car c'est l'ID du document Firestore lui-même
   /// (pas un champ du document)
   Map<String, dynamic> toJson() {
-    // Retourner un Map avec tous les champs de l'utilisateur
     return {
-      'email': email, // Email de l'utilisateur
-      'firstName': firstName, // Prénom
-      'lastName': lastName, // Nom
-      'age': age, // Âge
-      'photoUrl': photoUrl, // URL photo (peut être null)
-      'role': role, // Rôle (admin ou user)
-      'isActive': isActive, // Statut actif/désactivé
-      'favoriteMovies': favoriteMovies, // Liste des IDs des films favoris
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
+      'age': age,
+      'photoUrl': photoUrl,
+      'role': role,
+      'isActive': isActive,
+      'favoriteMovies': favoriteMovies,
     };
   }
 
@@ -272,7 +230,7 @@ class AppUser {
   /// - Vérifier les permissions avant certaines actions
   /// 
   /// Retourne : bool (true si admin, false sinon)
-  bool get isAdmin => role == 'admin'; // Retourner true si role == 'admin'
+  bool get isAdmin => role == 'admin';
 
   /// Getter fullName : Retourne le nom complet de l'utilisateur
   /// 
@@ -285,7 +243,7 @@ class AppUser {
   /// - Les messages personnalisés
   /// 
   /// Retourne : String (nom complet)
-  String get fullName => '$firstName $lastName'; // Concaténer prénom et nom
+  String get fullName => '$firstName $lastName';
 
   /// Méthode copyWith : Crée une copie de l'utilisateur avec des modifications optionnelles
   /// 
@@ -308,29 +266,26 @@ class AppUser {
   /// 
   /// Retourne : Une nouvelle instance AppUser avec les modifications appliquées
   AppUser copyWith({
-    String? id, // Nouvel ID (optionnel)
-    String? email, // Nouvel email (optionnel)
-    String? firstName, // Nouveau prénom (optionnel)
-    String? lastName, // Nouveau nom (optionnel)
-    int? age, // Nouvel âge (optionnel)
-    String? photoUrl, // Nouvelle URL photo (optionnel)
-    String? role, // Nouveau rôle (optionnel)
-    bool? isActive, // Nouveau statut actif (optionnel)
-    List<String>? favoriteMovies, // Nouvelle liste favoris (optionnel)
+    String? id,
+    String? email,
+    String? firstName,
+    String? lastName,
+    int? age,
+    String? photoUrl,
+    String? role,
+    bool? isActive,
+    List<String>? favoriteMovies,
   }) {
-    // Créer une nouvelle instance AppUser
     return AppUser(
-      // Utiliser la nouvelle valeur si fournie, sinon conserver l'ancienne
-      // ?? : Opérateur null-coalescing (utilise la valeur de droite si gauche est null)
-      id: id ?? this.id, // Nouvel ID ou ID actuel
-      email: email ?? this.email, // Nouvel email ou email actuel
-      firstName: firstName ?? this.firstName, // Nouveau prénom ou prénom actuel
-      lastName: lastName ?? this.lastName, // Nouveau nom ou nom actuel
-      age: age ?? this.age, // Nouvel âge ou âge actuel
-      photoUrl: photoUrl ?? this.photoUrl, // Nouvelle URL ou URL actuelle
-      role: role ?? this.role, // Nouveau rôle ou rôle actuel
-      isActive: isActive ?? this.isActive, // Nouveau statut ou statut actuel
-      favoriteMovies: favoriteMovies ?? this.favoriteMovies, // Nouvelle liste ou liste actuelle
+      id: id ?? this.id,
+      email: email ?? this.email,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      age: age ?? this.age,
+      photoUrl: photoUrl ?? this.photoUrl,
+      role: role ?? this.role,
+      isActive: isActive ?? this.isActive,
+      favoriteMovies: favoriteMovies ?? this.favoriteMovies,
     );
   }
 }

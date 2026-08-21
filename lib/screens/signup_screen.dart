@@ -43,7 +43,6 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  // ========== CONTRÔLEURS DE FORMULAIRE ==========
   
   /// Contrôleur pour le champ email
   final _emailController = TextEditingController();
@@ -63,7 +62,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Contrôleur pour le champ âge
   final _ageController = TextEditingController();
 
-  // ========== ÉTAT DE L'INTERFACE ==========
   
   /// Indicateur de chargement (affiche un spinner pendant l'inscription)
   bool _isLoading = false;
@@ -71,7 +69,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Message à afficher à l'utilisateur (erreur ou succès)
   String _message = '';
 
-  // ========== GESTION DE LA PHOTO ==========
   
   /// Fichier image sélectionné pour la photo de profil
   File? _profileImage;
@@ -82,7 +79,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   /// Service Firestore pour créer le profil utilisateur
   final FirestoreService _firestoreService = FirestoreService();
 
-  // ========== MÉTHODES ==========
 
   /// Sélectionne une image depuis la galerie
   /// 
@@ -110,7 +106,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  // Fonction pour prendre une photo
   Future<void> _takePhoto() async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -132,7 +127,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  // Fonction pour afficher le dialogue de sélection d'image
   void _showImagePickerDialog() {
     showDialog(
       context: context,
@@ -165,9 +159,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Fonction pour s'inscrire
   Future<void> _signUp() async {
-    // Valider l'email
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       setState(() {
@@ -183,7 +175,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Valider le prénom
     final firstName = _firstNameController.text.trim();
     if (firstName.isEmpty) {
       setState(() {
@@ -192,7 +183,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Valider le nom
     final lastName = _lastNameController.text.trim();
     if (lastName.isEmpty) {
       setState(() {
@@ -201,7 +191,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Valider l'âge
     final ageText = _ageController.text.trim();
     if (ageText.isEmpty) {
       setState(() {
@@ -218,7 +207,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Vérifier que les mots de passe correspondent
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _message = 'Les mots de passe ne correspondent pas';
@@ -226,7 +214,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Vérifier que le mot de passe a au moins 6 caractères
     if (_passwordController.text.length < 6) {
       setState(() {
         _message = 'Le mot de passe doit contenir au moins 6 caractères';
@@ -234,14 +221,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Afficher l'indicateur de chargement
     setState(() {
       _isLoading = true;
       _message = '';
     });
 
     try {
-      // Créer un compte avec Firebase Auth
       FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: _passwordController.text,
@@ -253,7 +238,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         debugPrint('✅ Compte Firebase Auth créé: ${user.uid}');
 
-        // Upload de la photo si elle existe
         String? photoUrl;
         if (_profileImage != null) {
           try {
@@ -263,11 +247,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             }
           } catch (e) {
             debugPrint('Erreur lors de l\'upload de la photo: $e');
-            // Continuer sans photo si l'upload échoue
           }
         }
 
-        // Créer le profil utilisateur dans Firestore
         final appUser = AppUser(
           id: user.uid,
           email: email,
@@ -284,12 +266,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           debugPrint('✅ Profil Firestore créé avec succès');
         } catch (e) {
           debugPrint('Erreur lors de la création du profil Firestore: $e');
-          // Le compte Firebase Auth est créé, mais le profil Firestore n'a pas pu être créé
-          // On peut continuer, l'utilisateur pourra se connecter et le profil sera créé à la connexion
-          // Ne pas bloquer l'inscription pour cette erreur
         }
 
-        // Si l'inscription réussit
         if (mounted) {
           setState(() {
             _isLoading = false;
@@ -297,7 +275,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           });
           
           debugPrint('✅ Navigation vers l\'écran de connexion...');
-          // Naviguer vers l'écran de connexion après un court délai
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
               Navigator.pushReplacement(
@@ -308,14 +285,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
           });
         }
       }).catchError((error) {
-        // Ignorer l'erreur "PigeonUserDetails" si elle survient après une inscription réussie
         final errorString = error.toString().toLowerCase();
         if (errorString.contains('pigeonuserdetails') || 
             errorString.contains('list<object?>') ||
             (errorString.contains('type') && errorString.contains('subtype'))) {
           debugPrint('⚠️ Erreur Firebase interne ignorée (non bloquante): $error');
           
-          // Vérifier si l'utilisateur a bien été créé malgré l'erreur
           final currentUser = FirebaseAuth.instance.currentUser;
           if (currentUser != null && mounted) {
             debugPrint('✅ L\'utilisateur a été créé malgré l\'erreur: ${currentUser.email}');
@@ -324,7 +299,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               _message = 'Inscription réussie !';
             });
             
-            // Naviguer vers l'écran de connexion
             Future.delayed(const Duration(seconds: 2), () {
               if (mounted) {
                 Navigator.pushReplacement(
@@ -333,11 +307,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 );
               }
             });
-            return; // Ne pas traiter comme une erreur
+            return;
           }
         }
         
-        // Pour les autres erreurs, les traiter normalement
         _handleSignUpError(error);
       });
     } catch (error) {
@@ -346,7 +319,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
   
   void _handleSignUpError(dynamic error) {
-    // Si il y a une erreur
     setState(() {
       _isLoading = false;
       String errorMessage = 'Erreur lors de l\'inscription';
@@ -376,7 +348,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             'SHA-1: C7:62:54:87:8D:D3:D3:63:50:F9:F5:91:B6:9D:C0:39:63:25:D8:C7\n'
             'SHA-256: 32:91:68:75:39:DE:E0:78:85:1A:01:59:70:AA:67:CE:08:B6:93:B6:C1:81:41:B8:9A:A8:26:C3:FB:3E:95:41';
       } else {
-        // Afficher le message d'erreur complet pour le débogage
         errorMessage = 'Erreur: ${error.toString()}';
         debugPrint('Erreur d\'inscription complète: $error');
       }
@@ -411,7 +382,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
                   const SizedBox(height: 30),
-                  // Photo de profil
                   GestureDetector(
                     onTap: _showImagePickerDialog,
                     child: CircleAvatar(
@@ -435,7 +405,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: const Text('Ajouter une photo de profil'),
                   ),
                   const SizedBox(height: 20),
-                  // Champ Prénom
                   TextField(
                     controller: _firstNameController,
                     decoration: const InputDecoration(
@@ -445,7 +414,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Champ Nom
                   TextField(
                     controller: _lastNameController,
                     decoration: const InputDecoration(
@@ -455,7 +423,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Champ Âge
                   TextField(
                     controller: _ageController,
                     decoration: const InputDecoration(
@@ -466,7 +433,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 16),
-            // Champ Email
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(
@@ -477,7 +443,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
-            // Champ Mot de passe
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(
@@ -488,7 +453,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               obscureText: true,
             ),
             const SizedBox(height: 16),
-            // Champ Confirmation mot de passe
             TextField(
               controller: _confirmPasswordController,
               decoration: const InputDecoration(
@@ -499,7 +463,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               obscureText: true,
             ),
             const SizedBox(height: 24),
-            // Bouton d'inscription
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -511,7 +474,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
             const SizedBox(height: 16),
-                  // Afficher le message
                   if (_message.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -525,7 +487,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
             const SizedBox(height: 16),
-            // Lien vers la connexion
             TextButton(
               onPressed: () {
                 Navigator.pushReplacement(
@@ -535,14 +496,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               },
               child: const Text('Déjà un compte ? Se connecter'),
             ),
-            const SizedBox(height: 32), // Espace supplémentaire en bas pour le scroll
+            const SizedBox(height: 32),
           ],
         ),
       ),
     );
   }
 
-  // Nettoyer les contrôleurs quand l'écran est détruit
   @override
   void dispose() {
     _emailController.dispose();
